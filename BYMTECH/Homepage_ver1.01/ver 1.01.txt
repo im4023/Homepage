@@ -1,0 +1,16 @@
+home.jsp,css
+- index_img 크기 변환 수정
+
+company.jsp,css
+- img 크기 변환 수정
+- flex 설정
+- div 재배치
+
+class container in css
+- padding 삭제
+
+locatin.jsp,css
+-구글 맵(iframe) 크기 변환 수정
+
+board-write.jsp,css
+- div 재배치

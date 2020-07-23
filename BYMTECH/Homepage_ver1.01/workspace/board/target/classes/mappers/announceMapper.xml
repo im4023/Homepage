@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.board.mappers.announce">
+
+	<!-- 게시물 목록 -->
+	<select id="list" resultType="com.board.domain.AnnounceVO">
+		select
+			idx, title, content, writer, regDate
+		from announce_board
+	</select>
+	
+	<!-- 게시물 작성 -->
+	<insert id="write" parameterType="com.board.domain.AnnounceVO">
+		insert into
+			announce_board(title, content, writer)
+				values(#{title}, #{content}, #{writer})
+	</insert>
+	
+	<!-- 게시물 조회 -->
+	<select id="view" parameterType="int" resultType="com.board.domain.AnnounceVO">
+		select
+			idx, title, content, writer, regDate
+		from
+			announce_board
+		where
+			idx = #{idx}
+	</select>
+	
+	<!-- 게시물 수정 -->
+	<update id="modify" parameterType="com.board.domain.AnnounceVO">
+		update announce_board
+			set
+				title = #{title},
+				content = #{content},
+				writer = #{writer}
+			where idx = #{idx}
+	</update>
+	
+	<!-- 게시물 삭제 -->
+	<delete id="delete" parameterType="int">
+		delete
+			from announce_board
+		where idx = #{idx}
+	</delete>
+	
+	<!-- 게시물 총 갯수 -->
+	<select id = "count" resultType="int">
+		select count(idx) from announce_board
+	</select>
+	
+	<!-- 게시물 목록 + 페이징 -->
+	<select id="listPage" resultType="com.board.domain.AnnounceVO" parameterType="com.board.domain.Criteria">
+		select idx, title, writer, regDate
+			from (
+           		select idx, title, content, writer, regDate,
+               		row_number() over(order by idx desc) as rNum
+           		from announce_board
+			) tb
+    	where rNum between #{rowStart} and #{rowEnd}
+        	order by idx desc
+	</select>
+	
+		
+	<select id="listCount" resultType="int">
+		<![CDATA[
+			select count(idx)
+				from announce_board
+					where idx > 0
+		]]>
+	</select>
+	
+	<!-- 검색 -->
+<select id="announcement" resultType="com.board.domain.AnnounceVO" 
+parameterType="com.board.domain.SearchCriteria">
+select idx, title, writer, regDate
+			from (
+           		select idx, title, content, writer, regDate,
+               		row_number() over(order by idx desc) as rNum
+           		from announce_board
+   			<include refid="search"></include>
+   		) tb
+    	where rNum between #{rowStart} and #{rowEnd}
+        	order by idx desc
+</select>
+
+<sql id="search">
+		<if test="searchType == 't'.toString()">where title like '%'  #{keyword}  '%' </if>
+		<if test="searchType == 'c'.toString()">where content like '%' #{keyword}  '%' </if>
+		<if test="searchType == 'w'.toString()">where writer like '%'  #{keyword}  '%'</if>
+		<if test="searchType == 'tc'.toString()">where (title like '%'  #{keyword}  '%')
+													or (content like '%'  #{keyword}  '%') </if>
+	
+</sql>
+	
+	
+	
+<select id="countSearch" resultType="int">
+	select count(idx)
+		from announce_board
+			<include refid="search"></include>
+		
+</select>
+		
+	
+</mapper>
